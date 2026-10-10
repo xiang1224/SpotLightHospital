@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>人員登入｜SpotLight 醫護局</title>
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+<main class="page">
+
+  <!-- 登入表單 -->
+  <section class="card" id="loginView" aria-labelledby="title">
+    <h1 id="title" class="logo"><img src="images/logo-light.png" alt="聚光燈醫院 SPOTLIGHT HOSPITAL"></h1>
+    <p class="sub">人員身分確認，請輸入醫護編碼與密碼</p>
+
+    <form id="form" novalidate>
+      <label>醫護編碼
+        <input id="code" name="code" inputmode="numeric" autocomplete="username" placeholder="例如 915" required>
+      </label>
+      <label>密碼
+        <input id="pw" name="pw" type="password" autocomplete="current-password" placeholder="請輸入指定密碼" required>
+      </label>
+      <p class="err" id="err" role="alert" aria-live="assertive"></p>
+      <button class="btn" type="submit">登入</button>
+    </form>
+    <p class="note">僅限局內人員。本站為角色扮演（RP）用途。</p>
+  </section>
+
+  <!-- 登入成功 -->
+  <section class="card ok" id="okView" aria-live="polite" hidden>
+    <div class="code" id="onlineCode">10-41</div>
+    <svg class="ecg" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 28 H130 L148 8 L170 44 L190 14 L204 28 H400"/></svg>
+    <div class="label">醫護編碼<b id="okCode"></b></div>
+    <h2 id="okName"></h2>
+    <p class="role" id="okRole"></p>
+    <p class="state">已上線，正在進入官網⋯</p>
+    <a class="btn" id="enter" href="index.html">立即進入</a>
+  </section>
+
+</main>
+<script src="js/roster.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

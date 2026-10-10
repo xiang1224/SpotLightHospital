@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SpotLight 醫護局</title>
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/tool.css">
+<!-- 登入守門員：沒登入會導向 login.html -->
+<script src="js/roster.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/guard.js"></script>
+</head>
+<body>
+<div id="app" v-cloak>
+
+  <!-- 導覽列 -->
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="聚光燈醫院 SPOTLIGHT HOSPITAL，回到頂端">
+        <picture>
+          <source media="(max-width:520px)" srcset="images/logo-mark-light.png">
+          <img src="images/logo-light.png" alt="聚光燈醫院 SPOTLIGHT HOSPITAL">
+        </picture>
+      </a>
+      <nav class="nav" aria-label="主選單">
+        <a href="#notice">公告</a>
+        <a href="#members">成員</a>
+        <a href="#memory">回憶區</a>
+      </nav>
+      <div class="who" v-if="user" :title="'醫護編碼 '+user.code+'・'+user.role">
+        <span class="live" aria-hidden="true"></span>
+        <span class="who-name">{{ user.name }} 已登入</span>
+        <button class="logout" type="button" @click="logout">登出</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 輪播 -->
+  <section id="top" class="hero" :class="{paused: paused, static: reduce}" aria-roledescription="輪播" aria-label="醫護局焦點"
+           @pointermove="moveLight" @mouseenter="paused=true" @mouseleave="paused=false"
+           @focusin="paused=true" @focusout="paused=false"
+           @touchstart.passive="tStart" @touchend.passive="tEnd" @keydown.left="prev" @keydown.right="next">
+    <div class="stage">
+      <div v-for="(s,i) in slides" :key="i" class="slide" :class="{on: i===cur, contain: s.fit==='contain'}" :aria-hidden="i!==cur" role="group" :aria-label="(i+1)+' / '+slides.length">
+        <img v-if="s.fit==='contain'" class="bg" :src="s.src" alt="" aria-hidden="true">
+        <img class="pic" :src="s.src" :alt="s.alt" :style="{objectPosition: s.pos || '50% 50%'}">
+        <div class="cap">
+          <div class="wrap">
+            <component :is="i===0?'h1':'h2'">{{ s.title }}</component>
+            <p>{{ s.text }}</p>
+            <a v-if="s.link" class="btn" :href="s.link" :tabindex="i===cur?0:-1">{{ s.btn }}</a>
+          </div>
+        </div>
+      </div>
+      <div class="spot" aria-hidden="true"></div>
+    </div>
+    <div class="ctl">
+      <div class="wrap">
+        <button class="arrow" @click="prev" aria-label="上一張">‹</button>
+        <div class="dots" role="tablist">
+          <button v-for="(s,i) in slides" :key="'d'+i" class="dot" :class="{on:i===cur}" :style="{'--dur': interval+'ms'}"
+                  role="tab" :aria-selected="i===cur" :aria-label="'第 '+(i+1)+' 張'" @click="go(i)"></button>
+        </div>
+        <button class="arrow" @click="next" aria-label="下一張">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 公告區 -->
+  <section id="notice" class="block">
+    <div class="wrap">
+      <div class="head">
+        <h2>公告區</h2>
+        <p>局內最新通知、招募與活動。點擊標題可展開詳細內容。</p>
+      </div>
+      <div class="notice-list">
+        <article v-for="n in sortedNotices" :key="n.id" class="notice" :class="{pin:n.pin, open: openId===n.id}">
+          <button @click="openId = openId===n.id ? null : n.id" :aria-expanded="openId===n.id">
+            <span class="tag" :class="n.color">{{ n.pin ? '置頂・' : '' }}{{ n.tag }}</span>
+            <h3>{{ n.title }}</h3>
+            <time :datetime="n.date">{{ n.date }}</time>
+            <span class="chev" aria-hidden="true">▾</span>
+          </button>
+          <div class="body"><div><p>{{ n.body }}</p></div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 成員組成 -->
+  <section id="members" class="block" style="padding-top:0">
+    <div class="wrap">
+      <div class="head">
+        <h2>成員組成</h2>
+        <p>由院長室領導，依專科分工。可依專科篩選，每位成員都標有醫護編碼。</p>
+      </div>
+      <div class="filters" role="group" aria-label="依專科篩選">
+        <button v-for="sp in specs" :key="sp" class="chip" :aria-pressed="spec===sp" @click="spec=sp">{{ sp }}</button>
+      </div>
+
+      <template v-for="g in groups" :key="g.title">
+        <div class="tier-title">{{ g.title }}</div>
+        <div class="members" :class="{lead: g.lead}">
+          <article v-for="m in g.list" :key="m.code" class="mem">
+            <img :src="m.avatar" :alt="m.name+' 頭像'">
+            <div>
+              <h3>{{ m.name }}</h3>
+              <div class="role">{{ m.role }}</div>
+              <div class="meta">醫編 <span class="code">{{ m.code }}</span></div>
+              <div class="specs" v-if="m.specs.length"><span v-for="sp in m.specs" :key="sp">{{ sp }}</span></div>
+            </div>
+          </article>
+        </div>
+      </template>
+      <p v-if="!groups.length" class="empty">這個專科目前沒有成員。</p>
+    </div>
+  </section>
+
+  <!-- 回憶區 -->
+  <section id="memory" class="block memory">
+    <div class="wrap">
+      <div class="head">
+        <h2>回憶區</h2>
+        <p>局內走過的主線劇情。選擇頁簽查看劇情概要、章節與相關圖片。</p>
+      </div>
+      <div class="mem-grid">
+        <div class="tabs" role="tablist" aria-label="主線劇情" aria-orientation="vertical" @keydown="tabKey">
+          <button v-for="(s,i) in stories" :key="s.id" class="tab" role="tab" :id="'tab-'+s.id"
+                  :aria-selected="tab===i" :aria-controls="'panel-'+s.id" :tabindex="tab===i?0:-1" @click="tab=i">
+            <small>{{ s.arc }}</small>
+            <b>{{ s.title }}</b>
+          </button>
+        </div>
+
+        <transition name="fade" mode="out-in">
+          <article class="panel" :key="story.id" role="tabpanel" :id="'panel-'+story.id" :aria-labelledby="'tab-'+story.id">
+            <div class="panel-head">
+              <h3>{{ story.title }}</h3>
+              <span class="status" :class="{live: story.live}">{{ story.live ? '進行中' : '已完結' }}</span>
+            </div>
+            <div class="when">劇情時間：{{ story.when }}</div>
+
+            <div class="sum"><p v-for="(p,i) in story.summary" :key="i">{{ p }}</p></div>
+
+            <h4 class="sub">章節</h4>
+            <ol class="chapters">
+              <li v-for="c in story.chapters" :key="c.t"><b>{{ c.t }}</b><span>{{ c.d }}</span></li>
+            </ol>
+
+            <h4 class="sub">主要登場角色</h4>
+            <div class="cast"><span v-for="c in story.cast" :key="c">{{ c }}</span></div>
+
+            <h4 class="sub">劇情相簿</h4>
+            <div class="gallery">
+              <figure v-for="(g,gi) in story.images" :key="gi">
+                <button @click="openLb(gi)" :aria-label="'放大圖片：'+g.cap"><img :src="g.src" :alt="g.cap" loading="lazy"></button>
+                <figcaption>{{ g.cap }}</figcaption>
+              </figure>
+            </div>
+          </article>
+        </transition>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">SpotLight 醫護局　本站為角色扮演（RP）用途，人物、組織與事件皆為虛構，與現實醫療無關。</div>
+  </footer>
+
+  <!-- 燈箱 -->
+  <div v-if="lb!==null" class="lb" role="dialog" aria-modal="true" aria-label="圖片檢視" @click.self="lb=null">
+    <button class="x" @click="lb=null" aria-label="關閉">✕</button>
+    <button class="p" @click="lbStep(-1)" aria-label="上一張">‹</button>
+    <figure>
+      <img :src="story.images[lb].src" :alt="story.images[lb].cap">
+      <figcaption>{{ story.images[lb].cap }}（{{ lb+1 }} / {{ story.images.length }}）</figcaption>
+    </figure>
+    <button class="n" @click="lbStep(1)" aria-label="下一張">›</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<!-- EMS 醫療工具（右下角懸浮按鈕） -->
+<script src="js/tool-data.js"></script>
+<script src="js/tool.js"></script>
+</body>
+</html>
