@@ -1,4 +1,10 @@
-
+/* =====================================================
+   ★ EMS 工具資料庫：改這裡就能新增傷勢、藥物與價目 ★
+   - treatmentMessages：醫療 /me 主控台的傷勢與步驟
+   - drugList：常用藥物指南
+   - MEDICAL_DATA：SOAP 小助手的處置(pLibrary)與衛教(eLibrary)
+   - FEE_CONFIG：醫藥費價目
+   ===================================================== */
 
 const treatmentMessages = {
     "abrasion": {

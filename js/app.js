@@ -8,7 +8,8 @@ createApp({
       slides: SLIDES.map(s => ({ ...s, src: s.src || ph(s.title.slice(0,18), s.hue) })),
       cur: 0, paused: false, interval: 6000, timer: null, touchX: 0,
       reduce: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-      notices: NOTICES, openId: 1,
+      notices: NOTICES,
+      openId: NOTICES.slice().sort((a, b) => (b.pin - a.pin) || b.date.localeCompare(a.date))[0].id,
       members: MEMBERS, spec: '全部',
       stories: STORIES, tab: STORIES.length - 1, lb: null,
       user: Auth.current()
@@ -19,7 +20,7 @@ createApp({
     specs(){ return ['全部', ...new Set(this.members.flatMap(m => m.specs))]; },
     filtered(){ return this.spec === '全部' ? this.members : this.members.filter(m => m.specs.includes(this.spec)); },
     groups(){
-      return TIERS.map(t => ({ ...t, list: this.filtered.filter(m => t.roles.includes(m.role)) })).filter(g => g.list.length);
+      return TIERS.map(t => ({ ...t, list: this.filtered.filter(m => t.external ? !!m.org : (!m.org && t.roles.includes(m.role))) })).filter(g => g.list.length);
     },
     story(){ return this.stories[this.tab]; }
   },
@@ -65,6 +66,8 @@ createApp({
       this.$nextTick(() => document.getElementById('tab-' + this.story.id)?.focus());
     },
     logout(){ Auth.logout(); },
+    photoFail(m){ if (m.photo !== m.avatar) m.photo = m.avatar; },
+    toggleProfile(open){ document.querySelectorAll('#memory .pf').forEach(d => { d.open = open; }); },
     openLb(i){ this.lb = i; },
     lbStep(d){
       const n = this.story.images.length;

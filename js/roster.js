@@ -13,6 +13,7 @@ const AUTH = {
 
   // 醫護名冊（登入名單與「成員組成」頁共用，改這裡兩邊都會更新）
   //   code = 醫護編碼（填文字）、name = 名字、role = 職稱、spec = 專科（可多個，沒有就留空 []）
+  //   photo = 自己的照片（選填）。沒填就自動用 images/members/醫編.jpg，找不到才顯示預設頭像
   //   如果某個人想用自己的密碼，可以加上 password: '自訂密碼'
   ROSTER: [
     { code: '915', name: '溫書玥',     role: '院長',     spec: ['骨科'] },
@@ -24,6 +25,8 @@ const AUTH = {
     { code: '945', name: '哈特沃爾特', role: '專科醫師', spec: ['法醫專科'] },
     { code: '919', name: '陶樂比',     role: '專科醫師', spec: ['急診外科'] },
     { code: '964', name: '韓若言',     role: '專科醫師', spec: ['毒物專科'] },
-    { code: '924', name: '白玄宇',     role: '住院醫師', spec: [] }
+    { code: '924', name: '白玄宇',     role: '住院醫師', spec: [] },
+    // 合作單位人員：加上 org（所屬單位），會顯示在「合作單位」分組
+    { code: '418', name: '凱利卡特', role: '一級警司',     org: '高洛波塔分局', spec: [] }
   ]
 };

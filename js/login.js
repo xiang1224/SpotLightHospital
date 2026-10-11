@@ -26,7 +26,7 @@
 
     $('okCode').textContent = r.user.code;
     $('okName').textContent = r.user.name;
-    $('okRole').textContent = r.user.role + (r.user.spec && r.user.spec.length ? '｜' + r.user.spec.join('・') : '');
+    $('okRole').textContent = (r.user.org ? r.user.org + '・' : '') + r.user.role + (r.user.spec && r.user.spec.length ? '｜' + r.user.spec.join('・') : '');
     loginView.hidden = true;
     okView.hidden = false;
     $('enter').focus();

@@ -76,7 +76,7 @@
     <div class="wrap">
       <div class="head">
         <h2>公告區</h2>
-        <p>局內最新通知、招募與活動。點擊標題可展開詳細內容。</p>
+        <p>局內最新的重要消息，依時間由新到舊排列。點擊標題可展開詳細內容。</p>
       </div>
       <div class="notice-list">
         <article v-for="n in sortedNotices" :key="n.id" class="notice" :class="{pin:n.pin, open: openId===n.id}">
@@ -107,10 +107,11 @@
         <div class="tier-title">{{ g.title }}</div>
         <div class="members" :class="{lead: g.lead}">
           <article v-for="m in g.list" :key="m.code" class="mem">
-            <img :src="m.avatar" :alt="m.name+' 頭像'">
+            <img :src="m.photo" :alt="m.name+' 的照片'" loading="lazy" @error="photoFail(m)">
             <div>
               <h3>{{ m.name }}</h3>
               <div class="role">{{ m.role }}</div>
+              <div class="meta org" v-if="m.org">{{ m.org }}</div>
               <div class="meta">醫編 <span class="code">{{ m.code }}</span></div>
               <div class="specs" v-if="m.specs.length"><span v-for="sp in m.specs" :key="sp">{{ sp }}</span></div>
             </div>
@@ -126,7 +127,7 @@
     <div class="wrap">
       <div class="head">
         <h2>回憶區</h2>
-        <p>局內走過的主線劇情。選擇頁簽查看劇情概要、章節與相關圖片。</p>
+        <p>局內走過的主線劇情，依時間由舊到新排列。選擇頁簽查看劇情概要與相關圖片。</p>
       </div>
       <div class="mem-grid">
         <div class="tabs" role="tablist" aria-label="主線劇情" aria-orientation="vertical" @keydown="tabKey">
@@ -147,21 +148,49 @@
 
             <div class="sum"><p v-for="(p,i) in story.summary" :key="i">{{ p }}</p></div>
 
-            <h4 class="sub">章節</h4>
-            <ol class="chapters">
-              <li v-for="c in story.chapters" :key="c.t"><b>{{ c.t }}</b><span>{{ c.d }}</span></li>
-            </ol>
+            <template v-if="story.profile && story.profile.length">
+              <div class="pf-head">
+                <h4 class="sub">{{ story.profileTitle || '背景檔案' }}</h4>
+                <span class="pf-tools">
+                  <button type="button" @click="toggleProfile(true)">全部展開</button>
+                  <button type="button" @click="toggleProfile(false)">全部收合</button>
+                </span>
+              </div>
+              <div class="pf-list">
+                <details v-for="(sec,si) in story.profile" :key="si" class="pf">
+                  <summary><span class="pf-group" v-if="sec.group">{{ sec.group }}</span><span class="pf-title">{{ sec.title }}</span></summary>
+                  <div class="pf-body">
+                    <div v-for="(b,bi) in sec.blocks" :key="bi" class="pf-block">
+                      <div class="pf-label" v-if="b.label">{{ b.label }}</div>
+                      <p v-if="b.text">{{ b.text }}</p>
+                      <ul v-if="b.items"><li v-for="(it,ii) in b.items" :key="ii">{{ it }}</li></ul>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </template>
 
-            <h4 class="sub">主要登場角色</h4>
-            <div class="cast"><span v-for="c in story.cast" :key="c">{{ c }}</span></div>
+            <template v-if="story.chapters && story.chapters.length">
+              <h4 class="sub">{{ story.chaptersTitle || '章節' }}</h4>
+              <ol class="chapters">
+                <li v-for="c in story.chapters" :key="c.t"><b>{{ c.t }}</b><span>{{ c.d }}</span></li>
+              </ol>
+            </template>
 
-            <h4 class="sub">劇情相簿</h4>
-            <div class="gallery">
-              <figure v-for="(g,gi) in story.images" :key="gi">
-                <button @click="openLb(gi)" :aria-label="'放大圖片：'+g.cap"><img :src="g.src" :alt="g.cap" loading="lazy"></button>
-                <figcaption>{{ g.cap }}</figcaption>
-              </figure>
-            </div>
+            <template v-if="story.cast && story.cast.length">
+              <h4 class="sub">{{ story.castTitle || '主要登場角色' }}</h4>
+              <div class="cast"><span v-for="c in story.cast" :key="c">{{ c }}</span></div>
+            </template>
+
+            <template v-if="story.images.length">
+              <h4 class="sub">劇情相簿</h4>
+              <div class="gallery">
+                <figure v-for="(g,gi) in story.images" :key="gi">
+                  <button @click="openLb(gi)" :aria-label="'放大圖片：'+g.cap"><img :src="g.src" :alt="g.cap" loading="lazy" :style="g.ratio ? { aspectRatio: g.ratio } : null"></button>
+                  <figcaption>{{ g.cap }}</figcaption>
+                </figure>
+              </div>
+            </template>
           </article>
         </transition>
       </div>
