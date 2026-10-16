@@ -10,6 +10,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/tool.css">
+<link rel="stylesheet" href="css/apoc.css">
+<!-- 風格記憶：先在畫面繪製前套用，避免閃一下 -->
+<script>try{if(localStorage.getItem("spotlight_world")==="apoc")document.documentElement.dataset.world="apoc"}catch(e){}</script>
 <!-- 登入守門員：沒登入會導向 login.html -->
 <script src="js/roster.js"></script>
 <script src="js/auth.js"></script>
@@ -32,9 +35,13 @@
         <a href="#members">成員</a>
         <a href="#memory">回憶區</a>
       </nav>
+      <button class="world-btn" type="button" :aria-pressed="apoc" :title="apoc ? '回到日常風格' : '切換為末日風格'" @click="toggleWorld">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v5"/><path d="M12 17.6v.1"/></svg>
+        <span class="wt">{{ apoc ? '回到日常' : '末日風格' }}</span>
+      </button>
       <div class="who" v-if="user" :title="'醫護編碼 '+user.code+'・'+user.role">
         <span class="live" aria-hidden="true"></span>
-        <span class="who-name">{{ user.name }} 已登入</span>
+        <span class="who-name">{{ user.name }}<span class="who-on"> 已登入</span></span>
         <button class="logout" type="button" @click="logout">登出</button>
       </div>
     </div>
@@ -107,6 +114,10 @@
         <div class="tier-title">{{ g.title }}</div>
         <div class="members" :class="{lead: g.lead}">
           <article v-for="m in g.list" :key="m.code" class="mem">
+            <button v-if="apoc && hasLetter(m)" type="button" class="env" :class="{mine: m.code===myCode, sealed: !canOpen(m)}"
+                    :aria-label="canOpen(m) ? '拆開院長寫給 '+m.name+' 的信' : '院長寫給 '+m.name+' 的信（已封緘）'" :title="canOpen(m) ? '院長的信' : '已封緘，只有收信人能拆開'" @click="openLetter(m)">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>
+            </button>
             <img :src="m.photo" :alt="m.name+' 的照片'" loading="lazy" @error="photoFail(m)">
             <div>
               <h3>{{ m.name }}</h3>
@@ -127,14 +138,20 @@
     <div class="wrap">
       <div class="head">
         <h2>回憶區</h2>
-        <p>局內走過的主線劇情，依時間由舊到新排列。選擇頁簽查看劇情概要與相關圖片。</p>
+        <p>分成「人物故事」與「劇情碎片」兩個頁籤：前者是每位成員的個人故事，後者是醫護局經歷過的事件與病例。選擇頁簽查看劇情概要與相關圖片。</p>
+      </div>
+      <div class="kinds" role="tablist" aria-label="回憶區分類" @keydown="kindKey">
+        <button v-for="k in kinds" :key="k.id" class="kind" role="tab" :id="'kind-'+k.id"
+                :aria-selected="memKind===k.id" :tabindex="memKind===k.id?0:-1" @click="setKind(k.id)">
+          {{ k.label }}<span class="n">{{ kindCount[k.id] || 0 }}</span>
+        </button>
       </div>
       <div class="mem-grid">
-        <div class="tabs" role="tablist" aria-label="主線劇情" aria-orientation="vertical" @keydown="tabKey">
-          <button v-for="(s,i) in stories" :key="s.id" class="tab" role="tab" :id="'tab-'+s.id"
-                  :aria-selected="tab===i" :aria-controls="'panel-'+s.id" :tabindex="tab===i?0:-1" @click="tab=i">
-            <small>{{ s.arc }}</small>
-            <b>{{ s.title }}</b>
+        <div class="tabs" role="tablist" :aria-label="memKind==='person' ? '人物故事' : '劇情碎片'" aria-orientation="vertical" @keydown="tabKey">
+          <button v-for="i in kindIdx" :key="stories[i].id" class="tab" role="tab" :id="'tab-'+stories[i].id"
+                  :aria-selected="tab===i" :aria-controls="'panel-'+stories[i].id" :tabindex="tab===i?0:-1" @click="tab=i">
+            <small>{{ stories[i].arc }}</small>
+            <b>{{ stories[i].title }}</b>
           </button>
         </div>
 
@@ -148,32 +165,35 @@
 
             <div class="sum"><p v-for="(p,i) in story.summary" :key="i">{{ p }}</p></div>
 
-            <template v-if="story.profile && story.profile.length">
-              <div class="pf-head">
-                <h4 class="sub">{{ story.profileTitle || '背景檔案' }}</h4>
-                <span class="pf-tools">
-                  <button type="button" @click="toggleProfile(true)">全部展開</button>
-                  <button type="button" @click="toggleProfile(false)">全部收合</button>
-                </span>
-              </div>
-              <div class="pf-list">
-                <details v-for="(sec,si) in story.profile" :key="si" class="pf">
-                  <summary><span class="pf-group" v-if="sec.group">{{ sec.group }}</span><span class="pf-title">{{ sec.title }}</span></summary>
-                  <div class="pf-body">
-                    <div v-for="(b,bi) in sec.blocks" :key="bi" class="pf-block">
-                      <div class="pf-label" v-if="b.label">{{ b.label }}</div>
-                      <p v-if="b.text">{{ b.text }}</p>
-                      <ul v-if="b.items"><li v-for="(it,ii) in b.items" :key="ii">{{ it }}</li></ul>
+            <template v-for="(g,gi) in profileGroups(story)" :key="gi">
+              <div class="pf-wrap">
+                <div class="pf-head">
+                  <h4 class="sub">{{ g.title }}</h4>
+                  <span class="pf-tools">
+                    <button type="button" @click="toggleProfile($event, true)">全部展開</button>
+                    <button type="button" @click="toggleProfile($event, false)">全部收合</button>
+                  </span>
+                </div>
+                <p class="pf-intro" v-if="g.intro">{{ g.intro }}</p>
+                <div class="pf-list">
+                  <details v-for="(sec,si) in g.list" :key="si" class="pf">
+                    <summary><span class="pf-group" v-if="sec.group">{{ sec.group }}</span><span class="pf-title">{{ sec.title }}</span></summary>
+                    <div class="pf-body">
+                      <div v-for="(b,bi) in sec.blocks" :key="bi" class="pf-block">
+                        <div class="pf-label" v-if="b.label">{{ b.label }}</div>
+                        <p v-if="b.text">{{ b.text }}</p>
+                        <ul v-if="b.items"><li v-for="(it,ii) in b.items" :key="ii">{{ it }}</li></ul>
+                      </div>
                     </div>
-                  </div>
-                </details>
+                  </details>
+                </div>
               </div>
             </template>
 
             <template v-if="story.chapters && story.chapters.length">
               <h4 class="sub">{{ story.chaptersTitle || '章節' }}</h4>
               <ol class="chapters">
-                <li v-for="c in story.chapters" :key="c.t"><b>{{ c.t }}</b><span>{{ c.d }}</span></li>
+                <li v-for="c in story.chapters" :key="c.t" :class="{ 'ch-head': c.head }"><b>{{ c.t }}</b><span v-if="c.d">{{ c.d }}</span></li>
               </ol>
             </template>
 
@@ -198,8 +218,32 @@
   </section>
 
   <footer>
-    <div class="wrap">SpotLight 醫護局　本站為角色扮演（RP）用途，人物、組織與事件皆為虛構，與現實醫療無關。</div>
+    <div class="wrap">SpotLight 醫護局　本站為角色扮演（RP）用途，人物、組織與事件皆為虛構，與現實醫療無關。
+      <div class="apoc-only" v-if="apoc">電力不穩，部分紀錄可能遺失。如果還有人在讀這裡，請保重。</div>
+    </div>
   </footer>
+
+  <!-- 末日風格：畫面質感（顆粒、暗角），不會擋住點擊 -->
+  <div class="apoc-fx" aria-hidden="true"></div>
+
+  <!-- 彩蛋：院長的信（只有末日風格才會出現） -->
+  <button v-if="apoc && myLetter" type="button" class="letter-fab" @click="openLetter(me)">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>
+    <span>有一封信給你</span>
+  </button>
+  <div class="toast" v-if="toast" role="status">{{ toast }}</div>
+  <div v-if="apoc && letter" class="letter-ov" role="dialog" aria-modal="true" aria-labelledby="letter-to" @click.self="closeLetter">
+    <article class="letter" ref="letterBox" tabindex="-1">
+      <button class="letter-x" type="button" @click="closeLetter" aria-label="收起這封信">✕</button>
+      <div class="letter-meta">院長室　{{ letter.from.name }} 親筆</div>
+      <h2 id="letter-to" class="sr-only">{{ letter.from.name }}院長寫給{{ letter.to.name }}的信</h2>
+      <p v-for="(p,i) in letter.paragraphs" :key="i" :class="{first: i===0}">{{ p }}</p>
+      <div class="letter-sign">
+        <span class="sig">{{ letter.from.name }}</span>
+        <small v-if="letter.date">{{ letter.date }}</small>
+      </div>
+    </article>
+  </div>
 
   <!-- 燈箱 -->
   <div v-if="lb!==null" class="lb" role="dialog" aria-modal="true" aria-label="圖片檢視" @click.self="lb=null">
@@ -216,6 +260,7 @@
 <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/data.js"></script>
+<script src="js/letters.js"></script>
 <script src="js/app.js"></script>
 <!-- EMS 醫療工具（右下角懸浮按鈕） -->
 <script src="js/tool-data.js"></script>

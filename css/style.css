@@ -127,6 +127,13 @@ section.block{padding:72px 0}
 /* ── 回憶區 ── */
 .memory{background:var(--night);color:#E6EFF1}
 .memory .head p{color:#9AB0B8}
+.kinds{display:inline-flex;gap:4px;padding:4px;margin-bottom:22px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.kind{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:#C5D4D9;padding:9px 22px;border-radius:999px;font-family:var(--serif);font-weight:700;font-size:1rem;white-space:nowrap;transition:background .15s,color .15s}
+.kind:hover{background:rgba(255,255,255,.1)}
+.kind .n{font-family:var(--sans);font-weight:500;font-size:.78rem;padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.12)}
+.kind[aria-selected="true"]{background:#E6EFF1;color:#10212B}
+.kind[aria-selected="true"] .n{background:rgba(16,33,43,.12)}
+@media (max-width:520px){.kinds{display:flex}.kind{flex:1;justify-content:center;padding:9px 10px}}
 .mem-grid{display:grid;grid-template-columns:270px 1fr;gap:28px;align-items:start}
 .tabs{display:flex;flex-direction:column;gap:8px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px)}
 .tab{text-align:left;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;color:#C5D4D9;transition:background .15s}
@@ -147,6 +154,9 @@ section.block{padding:72px 0}
 .chapters li{position:relative;padding:0 0 14px 18px}
 .chapters li::before{content:"";position:absolute;left:-26px;top:9px;width:12px;height:12px;border-radius:50%;background:var(--night);border:2px solid var(--amber)}
 .chapters b{display:block}
+.chapters li.ch-head{padding-top:18px}
+.chapters li.ch-head::before{top:27px;left:-25px;width:10px;height:10px;background:var(--amber);border-color:var(--amber)}
+.chapters li.ch-head b{font-size:.78rem;font-weight:700;letter-spacing:.14em;color:var(--amber)}
 .chapters span{color:#9AB0B8;font-size:.92rem}
 .cast{display:flex;flex-wrap:wrap;gap:8px}
 .cast span{border:1px solid rgba(255,255,255,.2);padding:2px 12px;border-radius:999px;font-size:.88rem}
@@ -162,6 +172,7 @@ section.block{padding:72px 0}
 .pf-tools{display:flex;gap:8px}
 .pf-tools button{border:1px solid rgba(255,255,255,.22);background:transparent;color:#C5D4D9;padding:3px 12px;border-radius:999px;font-size:.82rem}
 .pf-tools button:hover{background:rgba(255,255,255,.1)}
+.pf-intro{margin:0 0 12px;font-size:.88rem;line-height:1.7;color:#9AB0B8}
 .pf-list{display:flex;flex-direction:column;gap:8px}
 .pf{border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.03)}
 .pf[open]{background:rgba(255,255,255,.06)}
