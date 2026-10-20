@@ -1,16 +1,3 @@
-/* =====================================================
-   ★ 內容設定區：改這裡就能換內容 ★
-   圖片欄位 src 留空會自動產生佔位圖；
-   換成你的圖片請填入網址，例如 "images/ep1-01.jpg"
-   （自己架站時可直接用網址；若是放在 claude.ai 的發布頁，外部圖片會被擋，請改用 data URI）
-   ===================================================== */
-
-
-/* ── 輪播圖 ──
-   圖片被裁掉時，可以在每一張設定：
-   pos : 裁切時保留哪一塊，'50% 50%' 是正中間（預設）。
-         想保留上方用 '50% 0%'、想保留下方用 '50% 100%'、偏左 '0% 50%'、偏右 '100% 50%'，也可以微調 '50% 30%'。
-   fit : 'contain' = 圖片完整顯示，完全不裁切（兩側會用模糊的同一張圖補滿）。不寫就是預設的填滿裁切。 */
 const SLIDES = [
   { title: 'SpotLight 醫護局，二十四小時為你亮燈', text: '從急診室到街頭救護，我們在每一個需要的地方待命。', src: 'images/banner1.png', hue: 175, link: '#members', btn: '認識我們的成員', alt: '醫護局形象圖', pos: '50% 30%' },
   { title: '我們的寶，我們自己守護', text: '只要還有人記得，他們就沒有離開。', src: 'images/banner2.png', hue: 205, link: '#memory', btn: '前往回憶區', alt: '劇情圖', pos: '50% 10%' },
@@ -62,38 +49,18 @@ const MEMBERS = AUTH.ROSTER.map(r => ({
   avatar: avatar(r.name, (parseInt(r.code, 10) * 37) % 360)   // 依醫編自動配頭像顏色
 }));
 
-/* 打開網頁時，回憶區預設顯示哪一篇？填那一篇的 id。
-   目前有這些 id：
-     guard    我們的寶我們自己守護      xianian  大家的小朋友
-     park     奇特病歷－朴柒翎
-     gao      醫人不自醫－高荸梓          tianyi   天逸的故事
-     han      韓若言的故事                xiao     誤會與選擇－黃曉翔
-     e0814    耶和華見證人事件（8/14）
-     tao      陶樂比的故事                xia      夏家大小姐－夏雨姍
-     hart     哈特的故事
-     e0808 / e0809 / e0825 / e0828 / e0829   8/8、8/9、8/25、8/28、8/29 */
+
 const DEFAULT_STORY = 'guard';
 
-/* ── 回憶區：主線劇情（每個物件 = 一個頁簽，依時間由舊到新排列）──
-   必填：id、arc（頁簽上的小標，這裡用日期）、title、when、live、hue、summary（段落陣列）
-   選填：profile（背景檔案：可逐段展開的長篇資料，格式見下方「我們的寶」那一筆）、profileTitle（預設「背景檔案」）
-         analysis（第二個可展開區塊，格式同 profile）、analysisTitle（預設「心理分析」）、analysisIntro（區塊上方的說明文字）
-         chapters（時間軸，每筆 { t:標題, d:說明 }）、chaptersTitle（時間軸區塊的標題，預設「章節」）
-         cast（登場角色）、castTitle（角色區塊的標題，預設「主要登場角色」）、images（相簿）
-         cover（封面照路徑，例如 'images/covers/kelly.jpg'；人物故事不填的話會自動找 images/covers/故事id.jpg，找不到就顯示佔位圖）、coverPos（封面裁切位置，預設 '50% 50%'）
-         沒填的選填項目，畫面上就不會出現。
-   劇情照片已搬到 js/album.js，這裡不用再寫。 */
+
 const STORIES = [
   {
-    id: 'guard', arc: '半年守護', title: '我們的寶我們自己守護－溫書玥', when: '為期半年', live: false, hue: 175,
+    id: 'guard', arc: '半年守護', title: '我們的寶我們自己守護－溫書玥', when: '一輩子', live: true, hue: 175,
     summary: [
       '這是一段為期半年的守護過程。',
       '以下是故事主角的背景檔案，記錄她的創傷經歷、心理狀態與生活習慣。'
     ],
-    /* profile：每個物件是一個可展開的段落
-       group  : （選填）小標籤，把幾段歸成同一類
-       title  : 段落標題
-       blocks : 內容，每塊可以有 label（小標題）、text（一段文字）、items（條列）*/
+
     profile: [
       {
         title: '重大創傷事件', blocks: [
@@ -149,7 +116,7 @@ const STORIES = [
         ]
       }
     ],
-    cast: ['溫書玥（院長・骨科）'], cover:['images/members/915-logo.png']
+    cast: ['溫書玥（院長・骨科）'], cover: ['images/members/915-logo.png']
   },
 
   {
@@ -355,7 +322,7 @@ const STORIES = [
     cast: ['哈特（哈特沃爾特：專科醫師・法醫專科）'], cover: ['images/members/945-logo.png']
   },
   {
-    id: 'xianian', arc: '人物故事', title: '大家的小朋友－夏念', when: '成長歷程', live: false, hue: 330,
+    id: 'xianian', arc: '人物故事', title: '大家的小朋友－夏念', when: '成長歷程', live: true, hue: 330,
     summary: [
       '夏念是一個性格溫暖又很有同理心的女孩，總是下意識照顧身邊人的情緒。',
       '最後，夏念在大家的陪伴及引導下，成長為獨當一面的心理專科醫師。'
@@ -595,7 +562,7 @@ const STORIES = [
     cast: ['天逸（主任・神經外科、心臟外科）'], cover: ['images/members/911-logo.png']
   },
   {
-    id: 'han', arc: '人物故事', title: '愛了不該愛的人－韓若言', when: '從抵達到被家族帶回', live: false, hue: 230,
+    id: 'han', arc: '人物故事', title: '愛了不該愛的人－韓若言', when: '從抵達到被家族帶回', live: true, hue: 230,
     summary: [
       '韓若言，韓國籍，是韓氏醫藥集團的繼承人。出生時母親沈清晚難產而亡，自幼由父親韓景修親自撫養長大。',
       '她外冷內暖、極重承諾，表面看似高冷、難以接近，內心卻始終是那個渴望被愛、也願意全力去愛別人的女孩。'
@@ -685,6 +652,57 @@ const STORIES = [
     ],
     castTitle: '相關人員',
     cast: ['陶樂比（專科醫師・急診外科）'], cover: ['images/members/919-logo.png']
+  },
+  {
+    id: 'enxi', arc: '人物故事', title: '從警局到醫護局－成恩熙', when: '從入職警局到撤離至避難所', live: true, hue: 160,
+    summary: [
+      '成恩熙（醫編 905），主治醫師，不分科。出生於韓國仁川，三歲時隨父親調任移民台灣，成長過程中結識荷靜恩與顧語璃，三人以姊妹相稱；高中又結識李永順、林昇達與安在旭，六人形影不離。',
+      '李永順、安在旭、林昇達警校畢業後陸續接到 SpotLight 警局的入職通知，六個人一起飛往 SpotLight。恩熙先入職警局，發現警局不適合自己後離職，轉入醫護局，一路從實習期走到病毒爆發、撤離至避難所。',
+    ],
+    profileTitle: '人物故事',
+    profile: [
+      {
+        title: '基本資料', blocks: [
+          { items: ['醫編：905', '職稱：主治醫師', '專科：不分科', '出生地：韓國仁川'] }
+        ]
+      },
+      {
+        title: '成長背景', blocks: [
+          { text: '恩熙出生於韓國仁川，父親是企業高管，母親是書法老師。三歲那年，父親因需要調任分公司擔任管理層，舉家移民至台灣生活。' }
+        ]
+      },
+      {
+        title: '六人行', blocks: [
+          { text: '成長過程中，恩熙先後結識了荷靜恩與顧語璃，三人以姊妹相稱。' },
+          { text: '高中時又陸續結識李永順、林昇達與安在旭，六個人慢慢變得形影不離。' },
+          { text: '李永順、安在旭、林昇達三人在警校畢業後，先後接到 SpotLight 警局的入職通知，六個人一起飛往 SpotLight。' }
+        ]
+      },
+      {
+        title: '個性', blocks: [
+          { items: ['（待補：請填入恩熙的個性特質）'] }
+        ]
+      }
+    ],
+    chaptersTitle: '時間軸',
+    chapters: [
+      { t: '警局時期', head: true },
+      { t: '入職警局', d: '與李永順、安在旭、林昇達等人一起飛往 SpotLight。' },
+      { t: '慢慢發現警局不適合自己' },
+      { t: '警局離職' },
+      { t: '醫護局時期', head: true },
+      { t: '入職醫護局' },
+      { t: '實習期' },
+      { t: '升職考' },
+      { t: '留職停薪與復職', head: true },
+      { t: '兩個多月留職停薪' },
+      { t: '回國並復職' },
+      { t: '病毒爆發之後', head: true },
+      { t: '出現殭屍病毒' },
+      { t: '撤離至避難所' }
+    ],
+    castTitle: '相關人員',
+    cast: ['成恩熙（主治醫師・不分科）'], cover: ['images/members/905-logo.png']
   },
   {
     id: 'kelly', arc: '人物故事', title: '醫護局的守人者－凱利·卡特', when: '從合作到病毒爆發', live: true, hue: 220,

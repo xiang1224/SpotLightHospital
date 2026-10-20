@@ -1,18 +1,13 @@
-/* 主程式（Vue 3）：輪播、公告、成員篩選、回憶區頁簽與燈箱。
-   一般情況下不需要修改，內容請到 data.js。 */
 
 const { createApp } = Vue;
 
-/* 回憶區分成兩個頁籤：「人物故事」與「劇情碎片」。
-   每篇故事依 data.js 裡的 arc（頁簽小標）分類：arc 在下面這份清單裡的算「人物故事」，其餘都算「劇情碎片」。
-   想強制指定某一篇，可在 data.js 那一篇加上  kind: 'person'（人物故事）或  kind: 'fragment'（劇情碎片）。 */
+
 const PERSON_ARCS = ['人物故事', '長篇故事', '半年守護'];
 const MEM_KINDS = [
   { id: 'person', label: '人物故事' },
   { id: 'fragment', label: '劇情碎片' }
 ];
-/* 標籤裡的名字：若寫成「黃曉翔（督導）」會只取全形括號前面的部分。
-   同一個人在不同照片裡寫法不同時，在這裡補別名（左邊是寫法、右邊是統一的名字）。 */
+
 const PERSON_ALIAS = { '哈特': '哈特沃爾特' };
 const personName = c => { const n = String(c).split('（')[0].trim(); return PERSON_ALIAS[n] || n; };
 const kindOf = s => s.kind || (PERSON_ARCS.includes(s.arc) ? 'person' : 'fragment');
