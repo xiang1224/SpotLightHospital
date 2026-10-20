@@ -1,269 +1,385 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SpotLight 醫護局</title>
-<link rel="icon" type="image/png" href="images/favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/tool.css">
-<link rel="stylesheet" href="css/apoc.css">
-<!-- 風格記憶：先在畫面繪製前套用，避免閃一下 -->
-<script>try{if(localStorage.getItem("spotlight_world")==="apoc")document.documentElement.dataset.world="apoc"}catch(e){}</script>
-<!-- 登入守門員：沒登入會導向 login.html -->
-<script src="js/roster.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/guard.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SpotLight 醫護局</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tool.css">
+  <link rel="stylesheet" href="css/apoc.css">
+  <!-- 風格記憶：先在畫面繪製前套用，避免閃一下 -->
+  <script>try { if (localStorage.getItem("spotlight_world") === "apoc") document.documentElement.dataset.world = "apoc" } catch (e) { }</script>
+  <!-- 登入守門員：沒登入會導向 login.html -->
+  <script src="js/roster.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/guard.js"></script>
 </head>
+
 <body>
-<div id="app" v-cloak>
+  <div id="app" v-cloak>
 
-  <!-- 導覽列 -->
-  <header class="top">
-    <div class="wrap">
-      <a class="brand" href="#top" aria-label="聚光燈醫院 SPOTLIGHT HOSPITAL，回到頂端">
-        <picture>
-          <source media="(max-width:520px)" srcset="images/logo-mark-light.png">
-          <img src="images/logo-light.png" alt="聚光燈醫院 SPOTLIGHT HOSPITAL">
-        </picture>
-      </a>
-      <nav class="nav" aria-label="主選單">
-        <a href="#notice">公告</a>
-        <a href="#members">成員</a>
-        <a href="#memory">回憶區</a>
-      </nav>
-      <button class="world-btn" type="button" :aria-pressed="apoc" :title="apoc ? '回到日常風格' : '切換為末日風格'" @click="toggleWorld">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v5"/><path d="M12 17.6v.1"/></svg>
-        <span class="wt">{{ apoc ? '回到日常' : '末日風格' }}</span>
-      </button>
-      <div class="who" v-if="user" :title="'醫護編碼 '+user.code+'・'+user.role">
-        <span class="live" aria-hidden="true"></span>
-        <span class="who-name">{{ user.name }}<span class="who-on"> 已登入</span></span>
-        <button class="logout" type="button" @click="logout">登出</button>
+    <!-- 導覽列 -->
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="#top" aria-label="聚光燈醫院 SPOTLIGHT HOSPITAL，回到頂端">
+          <picture>
+            <source media="(max-width:520px)" srcset="images/logo-mark-light.png">
+            <img src="images/logo-light.png" alt="聚光燈醫院 SPOTLIGHT HOSPITAL">
+          </picture>
+        </a>
+        <nav class="nav" aria-label="主選單">
+          <a href="#notice">公告</a>
+          <a href="#members">成員</a>
+          <a href="#memory">回憶區</a>
+          <a href="#album">相簿</a>
+        </nav>
+        <button class="world-btn" type="button" :aria-pressed="apoc" :title="apoc ? '回到日常風格' : '切換為末日風格'"
+          @click="toggleWorld">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3 2.5 20h19L12 3z" />
+            <path d="M12 10v5" />
+            <path d="M12 17.6v.1" />
+          </svg>
+          <span class="wt">{{ apoc ? '回到日常' : '末日風格' }}</span>
+        </button>
+        <div class="who" v-if="user" :title="'醫護編碼 '+user.code+'・'+user.role">
+          <span class="live" aria-hidden="true"></span>
+          <span class="who-name">{{ user.name }}<span class="who-on"> 已登入</span></span>
+          <button class="logout" type="button" @click="logout">登出</button>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- 輪播 -->
-  <section id="top" class="hero" :class="{paused: paused, static: reduce}" aria-roledescription="輪播" aria-label="醫護局焦點"
-           @pointermove="moveLight" @mouseenter="paused=true" @mouseleave="paused=false"
-           @focusin="paused=true" @focusout="paused=false"
-           @touchstart.passive="tStart" @touchend.passive="tEnd" @keydown.left="prev" @keydown.right="next">
-    <div class="stage">
-      <div v-for="(s,i) in slides" :key="i" class="slide" :class="{on: i===cur, contain: s.fit==='contain'}" :aria-hidden="i!==cur" role="group" :aria-label="(i+1)+' / '+slides.length">
-        <img v-if="s.fit==='contain'" class="bg" :src="s.src" alt="" aria-hidden="true">
-        <img class="pic" :src="s.src" :alt="s.alt" :style="{objectPosition: s.pos || '50% 50%'}">
-        <div class="cap">
-          <div class="wrap">
-            <component :is="i===0?'h1':'h2'">{{ s.title }}</component>
-            <p>{{ s.text }}</p>
-            <a v-if="s.link" class="btn" :href="s.link" :tabindex="i===cur?0:-1">{{ s.btn }}</a>
+    <!-- 輪播 -->
+    <section id="top" class="hero" :class="{paused: paused, static: reduce}" aria-roledescription="輪播"
+      aria-label="醫護局焦點" @pointermove="moveLight" @mouseenter="paused=true" @mouseleave="paused=false"
+      @focusin="paused=true" @focusout="paused=false" @touchstart.passive="tStart" @touchend.passive="tEnd"
+      @keydown.left="prev" @keydown.right="next">
+      <div class="stage">
+        <div v-for="(s,i) in slides" :key="i" class="slide" :class="{on: i===cur, contain: s.fit==='contain'}"
+          :aria-hidden="i!==cur" role="group" :aria-label="(i+1)+' / '+slides.length">
+          <img v-if="s.fit==='contain'" class="bg" :src="s.src" alt="" aria-hidden="true">
+          <img class="pic" :src="s.src" :alt="s.alt" :style="{objectPosition: s.pos || '50% 50%'}">
+          <div class="cap">
+            <div class="wrap">
+              <component :is="i===0?'h1':'h2'">{{ s.title }}</component>
+              <p>{{ s.text }}</p>
+              <a v-if="s.link" class="btn" :href="s.link" :tabindex="i===cur?0:-1">{{ s.btn }}</a>
+            </div>
           </div>
         </div>
+        <div class="spot" aria-hidden="true"></div>
       </div>
-      <div class="spot" aria-hidden="true"></div>
-    </div>
-    <div class="ctl">
+      <div class="ctl">
+        <div class="wrap">
+          <button class="arrow" @click="prev" aria-label="上一張">‹</button>
+          <div class="dots" role="tablist">
+            <button v-for="(s,i) in slides" :key="'d'+i" class="dot" :class="{on:i===cur}"
+              :style="{'--dur': interval+'ms'}" role="tab" :aria-selected="i===cur" :aria-label="'第 '+(i+1)+' 張'"
+              @click="go(i)"></button>
+          </div>
+          <button class="arrow" @click="next" aria-label="下一張">›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 公告區 -->
+    <section id="notice" class="block">
       <div class="wrap">
-        <button class="arrow" @click="prev" aria-label="上一張">‹</button>
-        <div class="dots" role="tablist">
-          <button v-for="(s,i) in slides" :key="'d'+i" class="dot" :class="{on:i===cur}" :style="{'--dur': interval+'ms'}"
-                  role="tab" :aria-selected="i===cur" :aria-label="'第 '+(i+1)+' 張'" @click="go(i)"></button>
+        <div class="head">
+          <h2>公告區</h2>
+          <p>局內最新的重要消息，依時間由新到舊排列。點擊標題可展開詳細內容。</p>
         </div>
-        <button class="arrow" @click="next" aria-label="下一張">›</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- 公告區 -->
-  <section id="notice" class="block">
-    <div class="wrap">
-      <div class="head">
-        <h2>公告區</h2>
-        <p>局內最新的重要消息，依時間由新到舊排列。點擊標題可展開詳細內容。</p>
-      </div>
-      <div class="notice-list">
-        <article v-for="n in sortedNotices" :key="n.id" class="notice" :class="{pin:n.pin, open: openId===n.id}">
-          <button @click="openId = openId===n.id ? null : n.id" :aria-expanded="openId===n.id">
-            <span class="tag" :class="n.color">{{ n.pin ? '置頂・' : '' }}{{ n.tag }}</span>
-            <h3>{{ n.title }}</h3>
-            <time :datetime="n.date">{{ n.date }}</time>
-            <span class="chev" aria-hidden="true">▾</span>
-          </button>
-          <div class="body"><div><p>{{ n.body }}</p></div></div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- 成員組成 -->
-  <section id="members" class="block" style="padding-top:0">
-    <div class="wrap">
-      <div class="head">
-        <h2>成員組成</h2>
-        <p>由院長室領導，依專科分工。可依專科篩選，每位成員都標有醫護編碼。</p>
-      </div>
-      <div class="filters" role="group" aria-label="依專科篩選">
-        <button v-for="sp in specs" :key="sp" class="chip" :aria-pressed="spec===sp" @click="spec=sp">{{ sp }}</button>
-      </div>
-
-      <template v-for="g in groups" :key="g.title">
-        <div class="tier-title">{{ g.title }}</div>
-        <div class="members" :class="{lead: g.lead}">
-          <article v-for="m in g.list" :key="m.code" class="mem">
-            <button v-if="apoc && hasLetter(m)" type="button" class="env" :class="{mine: m.code===myCode, sealed: !canOpen(m)}"
-                    :aria-label="canOpen(m) ? '拆開院長寫給 '+m.name+' 的信' : '院長寫給 '+m.name+' 的信（已封緘）'" :title="canOpen(m) ? '院長的信' : '已封緘，只有收信人能拆開'" @click="openLetter(m)">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>
+        <div class="notice-list">
+          <article v-for="n in sortedNotices" :key="n.id" class="notice" :class="{pin:n.pin, open: openId===n.id}">
+            <button @click="openId = openId===n.id ? null : n.id" :aria-expanded="openId===n.id">
+              <span class="tag" :class="n.color">{{ n.pin ? '置頂・' : '' }}{{ n.tag }}</span>
+              <h3>{{ n.title }}</h3>
+              <time :datetime="n.date">{{ n.date }}</time>
+              <span class="chev" aria-hidden="true">▾</span>
             </button>
-            <img :src="m.photo" :alt="m.name+' 的照片'" loading="lazy" @error="photoFail(m)">
-            <div>
-              <h3>{{ m.name }}</h3>
-              <div class="role">{{ m.role }}</div>
-              <div class="meta org" v-if="m.org">{{ m.org }}</div>
-              <div class="meta">醫編 <span class="code">{{ m.code }}</span></div>
-              <div class="specs" v-if="m.specs.length"><span v-for="sp in m.specs" :key="sp">{{ sp }}</span></div>
+            <div class="body">
+              <div>
+                <p>{{ n.body }}</p>
+              </div>
             </div>
           </article>
         </div>
-      </template>
-      <p v-if="!groups.length" class="empty">這個專科目前沒有成員。</p>
-    </div>
-  </section>
+      </div>
+    </section>
 
-  <!-- 回憶區 -->
-  <section id="memory" class="block memory">
-    <div class="wrap">
-      <div class="head">
-        <h2>回憶區</h2>
-        <p>分成「人物故事」與「劇情碎片」兩個頁籤：前者是每位成員的個人故事，後者是醫護局經歷過的事件與病例。選擇頁簽查看劇情概要與相關圖片。</p>
+    <!-- 成員組成 -->
+    <section id="members" class="block" style="padding-top:0">
+      <div class="wrap">
+        <div class="head">
+          <h2>成員組成</h2>
+          <p>由院長室領導，依專科分工。可依專科篩選，每位成員都標有醫護編碼。</p>
+        </div>
+        <div class="filters" role="group" aria-label="依專科篩選">
+          <button v-for="sp in specs" :key="sp" class="chip" :aria-pressed="spec===sp" @click="spec=sp">{{ sp
+            }}</button>
+        </div>
+
+        <template v-for="g in groups" :key="g.title">
+          <div class="tier-title">{{ g.title }}</div>
+          <div class="members" :class="{lead: g.lead}">
+            <article v-for="m in g.list" :key="m.code" class="mem" role="button" tabindex="0"
+              :aria-label="'查看 '+m.name+' 的識別證'" title="點擊查看識別證" @click="openBadge(m)"
+              @keydown.enter.self.prevent="openBadge(m)" @keydown.space.self.prevent="openBadge(m)">
+              <button v-if="hasLetter(m)" type="button" class="env"
+                :class="{mine: m.code===myCode, sealed: !canOpen(m)}"
+                :aria-label="canOpen(m) ? '拆開院長寫給 '+m.name+' 的信' : '院長寫給 '+m.name+' 的信（已封緘）'"
+                :title="canOpen(m) ? '院長的信' : '已封緘，只有收信人能拆開'" @click.stop="openLetter(m)">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="14" rx="1.5" />
+                  <path d="m3.5 6.5 8.5 6.5 8.5-6.5" />
+                </svg>
+              </button>
+              <img :src="m.photo" :alt="m.name+' 的照片'" loading="lazy" @error="photoFail(m)">
+              <div>
+                <h3>{{ m.name }}</h3>
+                <div class="role">{{ m.role }}</div>
+                <div class="meta org" v-if="m.org">{{ m.org }}</div>
+                <div class="meta">醫編 <span class="code">{{ m.code }}</span></div>
+                <div class="specs" v-if="m.specs.length"><span v-for="sp in m.specs" :key="sp">{{ sp }}</span></div>
+              </div>
+            </article>
+          </div>
+        </template>
+        <p v-if="!groups.length" class="empty">這個專科目前沒有成員。</p>
       </div>
-      <div class="kinds" role="tablist" aria-label="回憶區分類" @keydown="kindKey">
-        <button v-for="k in kinds" :key="k.id" class="kind" role="tab" :id="'kind-'+k.id"
-                :aria-selected="memKind===k.id" :tabindex="memKind===k.id?0:-1" @click="setKind(k.id)">
-          {{ k.label }}<span class="n">{{ kindCount[k.id] || 0 }}</span>
-        </button>
-      </div>
-      <div class="mem-grid">
-        <div class="tabs" role="tablist" :aria-label="memKind==='person' ? '人物故事' : '劇情碎片'" aria-orientation="vertical" @keydown="tabKey">
-          <button v-for="i in kindIdx" :key="stories[i].id" class="tab" role="tab" :id="'tab-'+stories[i].id"
-                  :aria-selected="tab===i" :aria-controls="'panel-'+stories[i].id" :tabindex="tab===i?0:-1" @click="tab=i">
-            <small>{{ stories[i].arc }}</small>
-            <b>{{ stories[i].title }}</b>
+    </section>
+
+    <!-- 回憶區 -->
+    <section id="memory" class="block memory">
+      <div class="wrap">
+        <div class="head">
+          <h2>回憶區</h2>
+          <p>分成「人物故事」與「劇情碎片」兩個頁籤：前者是每位成員的個人故事，後者是醫護局經歷過的事件與病例。選擇頁簽查看劇情概要；所有劇情圖片都收在下方的「劇情相簿」。</p>
+        </div>
+        <div class="kinds" role="tablist" aria-label="回憶區分類" @keydown="kindKey">
+          <button v-for="k in kinds" :key="k.id" class="kind" role="tab" :id="'kind-'+k.id"
+            :aria-selected="memKind===k.id" :tabindex="memKind===k.id?0:-1" @click="setKind(k.id)">
+            {{ k.label }}<span class="n">{{ kindCount[k.id] || 0 }}</span>
           </button>
         </div>
+        <div class="mem-grid">
+          <div class="tabs" role="tablist" :aria-label="memKind==='person' ? '人物故事' : '劇情碎片'"
+            aria-orientation="vertical" @keydown="tabKey">
+            <button v-for="i in kindIdx" :key="stories[i].id" class="tab" role="tab" :id="'tab-'+stories[i].id"
+              :aria-selected="tab===i" :aria-controls="'panel-'+stories[i].id" :tabindex="tab===i?0:-1" @click="tab=i">
+              <small>{{ stories[i].arc }}</small>
+              <b>{{ stories[i].title }}</b>
+            </button>
+          </div>
 
-        <transition name="fade" mode="out-in">
-          <article class="panel" :key="story.id" role="tabpanel" :id="'panel-'+story.id" :aria-labelledby="'tab-'+story.id">
-            <div class="panel-head">
-              <h3>{{ story.title }}</h3>
-              <span class="status" :class="{live: story.live}">{{ story.live ? '進行中' : '已完結' }}</span>
-            </div>
-            <div class="when">劇情時間：{{ story.when }}</div>
-
-            <div class="sum"><p v-for="(p,i) in story.summary" :key="i">{{ p }}</p></div>
-
-            <template v-for="(g,gi) in profileGroups(story)" :key="gi">
-              <div class="pf-wrap">
-                <div class="pf-head">
-                  <h4 class="sub">{{ g.title }}</h4>
-                  <span class="pf-tools">
-                    <button type="button" @click="toggleProfile($event, true)">全部展開</button>
-                    <button type="button" @click="toggleProfile($event, false)">全部收合</button>
-                  </span>
-                </div>
-                <p class="pf-intro" v-if="g.intro">{{ g.intro }}</p>
-                <div class="pf-list">
-                  <details v-for="(sec,si) in g.list" :key="si" class="pf">
-                    <summary><span class="pf-group" v-if="sec.group">{{ sec.group }}</span><span class="pf-title">{{ sec.title }}</span></summary>
-                    <div class="pf-body">
-                      <div v-for="(b,bi) in sec.blocks" :key="bi" class="pf-block">
-                        <div class="pf-label" v-if="b.label">{{ b.label }}</div>
-                        <p v-if="b.text">{{ b.text }}</p>
-                        <ul v-if="b.items"><li v-for="(it,ii) in b.items" :key="ii">{{ it }}</li></ul>
-                      </div>
-                    </div>
-                  </details>
-                </div>
-              </div>
-            </template>
-
-            <template v-if="story.chapters && story.chapters.length">
-              <h4 class="sub">{{ story.chaptersTitle || '章節' }}</h4>
-              <ol class="chapters">
-                <li v-for="c in story.chapters" :key="c.t" :class="{ 'ch-head': c.head }"><b>{{ c.t }}</b><span v-if="c.d">{{ c.d }}</span></li>
-              </ol>
-            </template>
-
-            <template v-if="story.cast && story.cast.length">
-              <h4 class="sub">{{ story.castTitle || '主要登場角色' }}</h4>
-              <div class="cast"><span v-for="c in story.cast" :key="c">{{ c }}</span></div>
-            </template>
-
-            <template v-if="story.images.length">
-              <h4 class="sub">劇情相簿</h4>
-              <div class="gallery">
-                <figure v-for="(g,gi) in story.images" :key="gi">
-                  <button @click="openLb(gi)" :aria-label="'放大圖片：'+g.cap"><img :src="g.src" :alt="g.cap" loading="lazy" :style="g.ratio ? { aspectRatio: g.ratio } : null"></button>
-                  <figcaption>{{ g.cap }}</figcaption>
+          <transition name="fade" mode="out-in" @after-enter="unlockGrid" @enter-cancelled="unlockGrid">
+            <article class="panel" :key="story.id" role="tabpanel" :id="'panel-'+story.id"
+              :aria-labelledby="'tab-'+story.id">
+              <div class="story-top" :class="{'has-cover': showCover(story)}">
+                <figure class="cover" v-if="showCover(story)">
+                  <button type="button" class="cover-btn" @click="coverLb = true" :aria-label="'放大 '+story.title+' 封面照'"
+                    title="點擊放大">
+                    <img :src="coverSrc(story)" :alt="story.title+' 封面照'"
+                      :style="{objectPosition: story.coverPos || '50% 50%'}" loading="lazy"
+                      @error="coverFail($event, story)">
+                  </button>
                 </figure>
+                <div class="story-info">
+                  <div class="panel-head">
+                    <h3>{{ story.title }}</h3>
+                    <span class="status" :class="{live: story.live}">{{ story.live ? '進行中' : '已完結' }}</span>
+                  </div>
+                  <div class="when">劇情時間：{{ story.when }}</div>
+
+                  <div class="sum">
+                    <p v-for="(p,i) in story.summary" :key="i">{{ p }}</p>
+                  </div>
+                </div>
               </div>
-            </template>
-          </article>
-        </transition>
+
+              <template v-for="(g,gi) in profileGroups(story)" :key="gi">
+                <div class="pf-wrap">
+                  <div class="pf-head">
+                    <h4 class="sub">{{ g.title }}</h4>
+                    <span class="pf-tools">
+                      <button type="button" @click="toggleProfile($event, true)">全部展開</button>
+                      <button type="button" @click="toggleProfile($event, false)">全部收合</button>
+                    </span>
+                  </div>
+                  <p class="pf-intro" v-if="g.intro">{{ g.intro }}</p>
+                  <div class="pf-list">
+                    <details v-for="(sec,si) in g.list" :key="si" class="pf">
+                      <summary><span class="pf-group" v-if="sec.group">{{ sec.group }}</span><span class="pf-title">{{
+                          sec.title }}</span></summary>
+                      <div class="pf-body">
+                        <div v-for="(b,bi) in sec.blocks" :key="bi" class="pf-block">
+                          <div class="pf-label" v-if="b.label">{{ b.label }}</div>
+                          <p v-if="b.text">{{ b.text }}</p>
+                          <ul v-if="b.items">
+                            <li v-for="(it,ii) in b.items" :key="ii">{{ it }}</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                </div>
+              </template>
+
+              <template v-if="story.chapters && story.chapters.length">
+                <h4 class="sub">{{ story.chaptersTitle || '章節' }}</h4>
+                <ol class="chapters">
+                  <li v-for="c in story.chapters" :key="c.t" :class="{ 'ch-head': c.head }"><b>{{ c.t }}</b><span
+                      v-if="c.d">{{ c.d }}</span></li>
+                </ol>
+              </template>
+
+              <template v-if="story.cast && story.cast.length">
+                <h4 class="sub">{{ story.castTitle || '主要登場角色' }}</h4>
+                <div class="cast"><span v-for="c in story.cast" :key="c">{{ c }}</span></div>
+              </template>
+            </article>
+          </transition>
+        </div>
+      </div>
+    </section>
+
+    <!-- 劇情相簿：所有故事的照片集中在這裡 -->
+    <section id="album" class="block album">
+      <div class="wrap">
+        <div class="head">
+          <h2>劇情相簿</h2>
+          <p>所有故事的照片都收在這裡。可依參與人員篩選；點開照片可以放大，並查看這張照片的參與人員。</p>
+        </div>
+        <div class="filters" role="group" aria-label="依參與人員篩選照片">
+          <button class="chip" :aria-pressed="albumFilter==='all'" @click="albumFilter='all'">全部<span class="cn">{{
+              albumAll.length }}</span></button>
+          <button v-for="p in albumPeople" :key="p.name" class="chip" :aria-pressed="albumFilter===p.name"
+            @click="albumFilter=p.name">{{ p.name }}<span class="cn">{{ p.n }}</span></button>
+        </div>
+        <div class="album-grid" v-if="albumList.length">
+          <figure v-for="(g,i) in albumList" :key="g.storyId+'-'+i">
+            <button type="button" @click="openLb(i)" :aria-label="'放大圖片：'+(g.cap || '第 '+(i+1)+' 張')">
+              <img :src="g.src" :alt="g.cap || '劇情照片'" loading="lazy"
+                :style="g.ratio ? { aspectRatio: g.ratio } : null">
+            </button>
+            <figcaption v-if="g.cap || g.storyTitle"><b v-if="g.cap">{{ g.cap }}</b><small v-if="g.storyTitle">{{ g.arc
+                }}・{{ g.storyTitle }}</small></figcaption>
+          </figure>
+        </div>
+        <p v-else class="empty">目前還沒有放上照片。</p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">SpotLight 醫護局　本站為角色扮演（RP）用途，人物、組織與事件皆為虛構，與現實醫療無關。
+        <div class="apoc-only" v-if="apoc">電力不穩，部分紀錄可能遺失。如果還有人在讀這裡，請保重。</div>
+      </div>
+    </footer>
+
+    <!-- 末日風格：畫面質感（顆粒、暗角），不會擋住點擊 -->
+    <div class="apoc-fx" aria-hidden="true"></div>
+
+    <!-- 彩蛋：院長的信（日常、末日風格各有一套） -->
+    <button v-if="myLetter" type="button" class="letter-fab" @click="openLetter(me)">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"
+        stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="14" rx="1.5" />
+        <path d="m3.5 6.5 8.5 6.5 8.5-6.5" />
+      </svg>
+      <span>有一封信給你</span>
+    </button>
+    <div class="toast" v-if="toast" role="status">{{ toast }}</div>
+    <div v-if="letter" class="letter-ov" role="dialog" aria-modal="true" aria-labelledby="letter-to"
+      @click.self="closeLetter">
+      <article class="letter" ref="letterBox" tabindex="-1">
+        <button class="letter-x" type="button" @click="closeLetter" aria-label="收起這封信">✕</button>
+        <div class="letter-meta">院長室　{{ letter.from.name }} 親筆</div>
+        <h2 id="letter-to" class="sr-only">{{ letter.from.name }}院長寫給{{ letter.to.name }}的信</h2>
+        <p v-for="(p,i) in letter.paragraphs" :key="i" :class="{first: i===0}">{{ p }}</p>
+        <div class="letter-sign">
+          <span class="sig">{{ letter.from.name }}</span>
+          <small v-if="letter.date">{{ letter.date }}</small>
+        </div>
+      </article>
+    </div>
+
+    <!-- 識別證：正反兩面，點擊翻面 -->
+    <div v-if="badge" class="bd-ov" role="dialog" aria-modal="true" :aria-label="badge.name+' 的識別證'"
+      @click.self="closeBadge">
+      <button class="bd-x" type="button" ref="badgeX" @click="closeBadge" aria-label="關閉識別證">✕</button>
+      <div class="bd-wrap">
+        <h2 class="bd-title">{{ badge.name }}</h2>
+        <div class="bd-sub">{{ badge.org ? badge.org + '・' : '' }}{{ badge.role }}　醫編 {{ badge.code }}</div>
+        <div class="bd-scene">
+          <button type="button" class="bd-card" :class="{'is-back': badgeBack}" @click="badgeBack = !badgeBack"
+            :aria-label="badgeBack ? '目前是背面，點擊翻到正面' : '目前是正面，點擊翻到背面'">
+            <span class="bd-face front" :aria-hidden="badgeBack">
+              <img :src="badgeSrc(badge,'front')" :alt="badge.name+' 識別證正面'" @error="badgeErr($event, badge, 'front')">
+            </span>
+            <span class="bd-face back" :aria-hidden="!badgeBack">
+              <img :src="badgeSrc(badge,'back')" :alt="badge.name+' 識別證背面'" @error="badgeErr($event, badge, 'back')">
+            </span>
+          </button>
+        </div>
+        <div class="bd-tabs" role="group" aria-label="識別證正反面">
+          <button type="button" :aria-pressed="!badgeBack" @click="badgeBack = false">正面</button>
+          <button type="button" :aria-pressed="badgeBack" @click="badgeBack = true">背面</button>
+        </div>
+        <p class="bd-hint">點擊識別證可翻面，也可以用 ← → 鍵翻面、Esc 關閉</p>
       </div>
     </div>
-  </section>
 
-  <footer>
-    <div class="wrap">SpotLight 醫護局　本站為角色扮演（RP）用途，人物、組織與事件皆為虛構，與現實醫療無關。
-      <div class="apoc-only" v-if="apoc">電力不穩，部分紀錄可能遺失。如果還有人在讀這裡，請保重。</div>
+    <!-- 封面照放大 -->
+    <div v-if="coverLb && story" class="lb lb--cover" role="dialog" aria-modal="true" aria-label="封面照檢視"
+      @click.self="coverLb = false">
+      <button class="x" @click="coverLb = false" aria-label="關閉">✕</button>
+      <figure>
+        <img :src="coverSrc(story)" :alt="story.title+' 封面照'" @error="coverFail($event, story)">
+        <figcaption>
+          <div class="lb-cap">{{ story.title }}</div>
+        </figcaption>
+      </figure>
     </div>
-  </footer>
 
-  <!-- 末日風格：畫面質感（顆粒、暗角），不會擋住點擊 -->
-  <div class="apoc-fx" aria-hidden="true"></div>
-
-  <!-- 彩蛋：院長的信（只有末日風格才會出現） -->
-  <button v-if="apoc && myLetter" type="button" class="letter-fab" @click="openLetter(me)">
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>
-    <span>有一封信給你</span>
-  </button>
-  <div class="toast" v-if="toast" role="status">{{ toast }}</div>
-  <div v-if="apoc && letter" class="letter-ov" role="dialog" aria-modal="true" aria-labelledby="letter-to" @click.self="closeLetter">
-    <article class="letter" ref="letterBox" tabindex="-1">
-      <button class="letter-x" type="button" @click="closeLetter" aria-label="收起這封信">✕</button>
-      <div class="letter-meta">院長室　{{ letter.from.name }} 親筆</div>
-      <h2 id="letter-to" class="sr-only">{{ letter.from.name }}院長寫給{{ letter.to.name }}的信</h2>
-      <p v-for="(p,i) in letter.paragraphs" :key="i" :class="{first: i===0}">{{ p }}</p>
-      <div class="letter-sign">
-        <span class="sig">{{ letter.from.name }}</span>
-        <small v-if="letter.date">{{ letter.date }}</small>
-      </div>
-    </article>
+    <!-- 燈箱：照片＋參與人員 -->
+    <div v-if="curPhoto" class="lb" role="dialog" aria-modal="true" aria-label="圖片檢視" @click.self="lb=null">
+      <button class="x" @click="lb=null" aria-label="關閉">✕</button>
+      <button class="p" @click="lbStep(-1)" aria-label="上一張">‹</button>
+      <figure>
+        <img :src="curPhoto.src" :alt="curPhoto.cap || '劇情照片'">
+        <figcaption>
+          <div class="lb-cap">{{ curPhoto.cap }}<span :style="curPhoto.cap ? null : {marginLeft:0}">（{{ lb+1 }} / {{
+              albumList.length }}）</span></div>
+          <div class="lb-from" v-if="curPhoto.storyTitle">{{ curPhoto.arc }}・{{ curPhoto.storyTitle }}</div>
+          <div class="lb-cast" v-if="curPhoto.tags.length">
+            <div class="lb-cast-t">參與人員</div>
+            <div class="cast"><span v-for="c in curPhoto.tags" :key="c">{{ c }}</span></div>
+          </div>
+        </figcaption>
+      </figure>
+      <button class="n" @click="lbStep(1)" aria-label="下一張">›</button>
+    </div>
   </div>
 
-  <!-- 燈箱 -->
-  <div v-if="lb!==null" class="lb" role="dialog" aria-modal="true" aria-label="圖片檢視" @click.self="lb=null">
-    <button class="x" @click="lb=null" aria-label="關閉">✕</button>
-    <button class="p" @click="lbStep(-1)" aria-label="上一張">‹</button>
-    <figure>
-      <img :src="story.images[lb].src" :alt="story.images[lb].cap">
-      <figcaption>{{ story.images[lb].cap }}（{{ lb+1 }} / {{ story.images.length }}）</figcaption>
-    </figure>
-    <button class="n" @click="lbStep(1)" aria-label="下一張">›</button>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/data.js"></script>
-<script src="js/letters.js"></script>
-<script src="js/app.js"></script>
-<!-- EMS 醫療工具（右下角懸浮按鈕） -->
-<script src="js/tool-data.js"></script>
-<script src="js/tool.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/letters.js"></script>
+  <script src="js/album.js"></script>
+  <script src="js/app.js"></script>
+  <!-- EMS 醫療工具（右下角懸浮按鈕） -->
+  <script src="js/tool-data.js"></script>
+  <script src="js/tool.js"></script>
 </body>
+
 </html>

@@ -22,10 +22,11 @@ const AUTH = {
     { code: '966', name: '高荸梓',     role: '督導',     spec: ['心理專科'] },
     { code: '920', name: '黃曉翔',     role: '督導',     spec: ['胸腔外科'] },
     { code: '942', name: '夏念',       role: '專科醫師', spec: ['心理專科'] },
-    { code: '945', name: '哈特沃爾特', role: '專科醫師', spec: ['法醫專科'] },
+    { code: '945', name: '哈特．沃爾特', role: '專科醫師', spec: ['法醫專科'] },
     { code: '919', name: '陶樂比',     role: '專科醫師', spec: ['急診外科'] },
     { code: '964', name: '韓若言',     role: '專科醫師', spec: ['毒物專科'] },
-    { code: '924', name: '白玄宇',     role: '住院醫師', spec: [] },
+    { code: '905', name: '成恩熙', role: '主治醫師', spec: ['不分科'] },
+    { code: '924', name: '白玄宇',     role: '住院醫師', spec: ['不分科'] },
     // 合作單位人員：加上 org（所屬單位），會顯示在「合作單位」分組
     { code: '418', name: '凱利．卡特', role: '一級警司',     org: '高洛波塔分局', spec: [] },
     { code: '412', name: '露娜．羅西爾', role: '實習警員', org: '高洛波塔分局', spec: [] }
