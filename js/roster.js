@@ -16,7 +16,7 @@ const AUTH = {
   //   photo = 自己的照片（選填）。沒填就自動用 images/members/醫編.jpg，找不到才顯示預設頭像
   //   如果某個人想用自己的密碼，可以加上 password: '自訂密碼'
   ROSTER: [
-    { code: '915', name: '溫書玥',     role: '院長',     spec: ['骨科'] },
+    { code: '915', name: '溫書玥', role: '院長',         spec: ['骨科']},
     { code: '955', name: '夏雨姍',     role: '副院長',   spec: ['急診外科', '胸腔外科'] },
     { code: '911', name: '天逸',       role: '主任',     spec: ['神經外科', '心臟外科'] },
     { code: '966', name: '高荸梓',     role: '督導',     spec: ['心理專科'] },
