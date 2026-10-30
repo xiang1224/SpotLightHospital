@@ -1,4 +1,3 @@
-
 const { createApp } = Vue;
 
 
@@ -63,15 +62,16 @@ createApp({
     apoc() { return this.world === 'apoc'; },
     myCode() { return this.user ? this.user.code : ''; },
     me() { return this.members.find(m => m.code === this.myCode) || null; },
-    myLetter() { return this.me ? this.letterText(this.me) : null; },
+    myLetter() { return this.me && this.hasLetter(this.me) ? true : null; },
     // 目前打開的識別證（沒有就是 null）
     badge() { return this.badgeFor ? (this.members.find(m => m.code === this.badgeFor) || null) : null; },
     // 目前打開的那封信（沒有就是 null）
     letter() {
       const to = this.letterFor && this.members.find(m => m.code === this.letterFor);
-      const paragraphs = to && this.letterText(to);
-      if (!paragraphs) return null;
-      return { to, paragraphs, from: LETTER_FROM, date: LETTER_DATE };
+      if (!to) return null;
+      const image = this.letterImage(to), paragraphs = this.letterText(to);
+      if (!image && !paragraphs) return null;
+      return { to, image, paragraphs: paragraphs || [], from: LETTER_SENDERS[to.code] || LETTER_FROM, date: LETTER_DATE };
     }
   },
   watch: {
@@ -165,15 +165,24 @@ createApp({
     // ── 院長的信 ──
     // 回傳這個人的信（段落陣列，已把 {name} 換成名字）；沒有信就回傳 null
     letterText(m) {
-      if (!m || m.code === LETTER_FROM.code) return null;
+      if (!m) return null;
       // 日常風格與末日風格各有一套信（letters.js）
       const set = this.apoc ? LETTERS : LETTERS_DAY, def = this.apoc ? LETTER_DEFAULT : LETTER_DEFAULT_DAY;
       const own = set[m.code];
       if (own === null) return null;
+      if (m.code === LETTER_FROM.code && !(own && own.length)) return null;   // 院長本人沒有專屬信就不收信
       const src = (own && own.length) ? own : (m.org ? null : def);
       return src ? src.map(t => t.replace(/\{name\}/g, m.name)) : null;
     },
-    hasLetter(m) { return !!this.letterText(m); },
+    // 末日風格才有的「照片信」（letters.js 的 LETTER_IMAGES）；沒有就回傳 null
+    letterImage(m) { return (this.apoc && m && LETTER_IMAGES[m.code]) || null; },
+    relicFail(e) {
+      const img = e.target;
+      if (img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      img.src = relicPh();
+    },
+    hasLetter(m) { return !!this.letterImage(m) || !!this.letterText(m); },
     canOpen(m) { return LETTERS_OPEN_TO_ALL || m.code === this.myCode; },
     openLetter(m) {
       if (!this.hasLetter(m)) return;

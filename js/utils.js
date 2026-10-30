@@ -1,4 +1,3 @@
-
 // 產生佔位圖（心電圖風格）
 function ph(label, hue) {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 675'>
@@ -39,5 +38,15 @@ function badgePh(m, side) {
   <text x='830' y='720' font-size='84' fill='#27527a' font-family='sans-serif'>${esc(m.role)}${m.org ? '・' + esc(m.org) : ''}</text>
   <text x='830' y='900' font-size='60' letter-spacing='6' fill='#27527a' font-family='sans-serif'>醫編 STAFF ID</text>
   <text x='830' y='1060' font-size='170' font-weight='900' fill='#10213b' font-family='sans-serif'>${esc(m.code)}</text></svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+// 遺物照片找不到圖時的佔位圖（泛黃、復古）
+function relicPh() {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'>
+  <defs><radialGradient id='g' cx='50%' cy='45%' r='70%'><stop offset='0' stop-color='#6b5336'/><stop offset='1' stop-color='#241a10'/></radialGradient></defs>
+  <rect width='800' height='600' fill='url(#g)'/>
+  <path d='M0 360 H260 L300 290 L345 430 L395 330 L430 360 H800' fill='none' stroke='#d8c39a' stroke-opacity='.35' stroke-width='5' stroke-linejoin='round'/>
+  <text x='400' y='480' text-anchor='middle' font-size='30' fill='#d8c39a' fill-opacity='.8' font-family='serif'>請把照片放到 images/relic-915.jpg</text></svg>`;
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 }

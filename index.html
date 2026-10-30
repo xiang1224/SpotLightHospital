@@ -301,15 +301,22 @@
     <div class="toast" v-if="toast" role="status">{{ toast }}</div>
     <div v-if="letter" class="letter-ov" role="dialog" aria-modal="true" aria-labelledby="letter-to"
       @click.self="closeLetter">
-      <article class="letter" ref="letterBox" tabindex="-1">
+      <article class="letter" :class="{relic: letter.image && !letter.paragraphs.length}" ref="letterBox" tabindex="-1">
         <button class="letter-x" type="button" @click="closeLetter" aria-label="收起這封信">✕</button>
-        <div class="letter-meta">院長室　{{ letter.from.name }} 親筆</div>
-        <h2 id="letter-to" class="sr-only">{{ letter.from.name }}院長寫給{{ letter.to.name }}的信</h2>
+        <div class="letter-meta" v-if="letter.paragraphs.length">{{ letter.from.office ? letter.from.office + '　' : ''
+          }}{{ letter.from.name }} 親筆</div>
+        <h2 id="letter-to" class="sr-only">{{ letter.from.name }}{{ letter.from.role }}寫給{{ letter.to.name }}的信</h2>
         <p v-for="(p,i) in letter.paragraphs" :key="i" :class="{first: i===0}">{{ p }}</p>
-        <div class="letter-sign">
+        <div class="letter-sign" v-if="letter.paragraphs.length">
           <span class="sig">{{ letter.from.name }}</span>
           <small v-if="letter.date">{{ letter.date }}</small>
         </div>
+        <figure v-if="letter.image" class="relic-photo">
+          <div class="relic-frame">
+            <img :src="letter.image.src" alt="遺物照片" @error="relicFail">
+          </div>
+          <figcaption v-if="letter.image.cap">{{ letter.image.cap }}</figcaption>
+        </figure>
       </article>
     </div>
 
