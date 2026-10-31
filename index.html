@@ -313,7 +313,9 @@
         </div>
         <figure v-if="letter.image" class="relic-photo">
           <div class="relic-frame">
-            <img :src="letter.image.src" alt="遺物照片" @error="relicFail">
+            <button type="button" class="relic-btn" @click="relicLb = true" aria-label="放大遺物照片">
+              <img :src="letter.image.src" alt="遺物照片" @error="relicFail">
+            </button>
           </div>
           <figcaption v-if="letter.image.cap">{{ letter.image.cap }}</figcaption>
         </figure>
@@ -344,6 +346,18 @@
         </div>
         <p class="bd-hint">點擊識別證可翻面，也可以用 ← → 鍵翻面、Esc 關閉</p>
       </div>
+    </div>
+
+    <!-- 遺物照片放大（信裡的照片） -->
+    <div v-if="relicLb && letter && letter.image" class="lb lb--cover lb--relic" role="dialog" aria-modal="true"
+      aria-label="遺物照片檢視" @click.self="relicLb = false">
+      <button class="x" @click="relicLb = false" aria-label="關閉">✕</button>
+      <figure>
+        <img :src="letter.image.src" alt="遺物照片" @error="relicFail">
+        <figcaption v-if="letter.image.cap">
+          <div class="lb-cap">{{ letter.image.cap }}</div>
+        </figcaption>
+      </figure>
     </div>
 
     <!-- 封面照放大 -->

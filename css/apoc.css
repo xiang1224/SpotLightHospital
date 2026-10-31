@@ -713,4 +713,33 @@ html.flick body {
 
 .letter:not(.relic) .relic-photo::after {
   right: -18px
-} 
+}
+
+
+/* 信裡的遺物照片：可點擊放大 */
+.relic-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  line-height: 0
+}
+
+.relic-btn:focus-visible {
+  outline: 3px solid #E3B04B;
+  outline-offset: 2px
+}
+
+.lb--relic {
+  z-index: 110
+}
+
+.lb--relic img {
+  border-radius: 2px;
+  border: 14px solid #D9CBAA;
+  border-bottom-width: 44px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .8)
+}

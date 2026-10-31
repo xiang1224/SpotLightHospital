@@ -27,6 +27,7 @@ createApp({
       world: document.documentElement.dataset.world === 'apoc' ? 'apoc' : 'day',
       letterFor: null, toast: '', toastTimer: null,
       coverLb: false,                 // 封面照放大
+      relicLb: false,                 // 信裡的遺物照片放大
       badgeFor: null, badgeBack: false // 識別證檢視（醫編、是否翻到背面）
     };
   },
@@ -92,6 +93,7 @@ createApp({
     this.restart();
     this.showActiveTab();
     window.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && this.relicLb) { this.relicLb = false; return; }
       if (e.key === 'Escape' && this.letterFor) { this.closeLetter(); return; }
       if (e.key === 'Escape' && this.badgeFor) { this.closeBadge(); return; }
       if (e.key === 'Escape' && this.coverLb) { this.coverLb = false; return; }
@@ -159,7 +161,7 @@ createApp({
       this.world = w;
       if (w === 'apoc') document.documentElement.dataset.world = 'apoc';
       else delete document.documentElement.dataset.world;
-      this.letterFor = null;   // 換風格時收起已打開的信（兩種風格的信不一樣）
+      this.letterFor = null; this.relicLb = false;   // 換風格時收起已打開的信（兩種風格的信不一樣）
       try { w === 'apoc' ? localStorage.setItem('spotlight_world', 'apoc') : localStorage.removeItem('spotlight_world'); } catch (e) { }
     },
     // ── 院長的信 ──
@@ -190,7 +192,7 @@ createApp({
       this.letterFor = m.code;
       this.$nextTick(() => this.$refs.letterBox && this.$refs.letterBox.focus());
     },
-    closeLetter() { this.letterFor = null; },
+    closeLetter() { this.letterFor = null; this.relicLb = false; },
     say(msg) {
       this.toast = msg; clearTimeout(this.toastTimer);
       this.toastTimer = setTimeout(() => { this.toast = ''; }, 2600);
